@@ -1,47 +1,33 @@
-const tmi = require("tmi.js");
+const irc = require("irc");
 const keyHandler = require("./keyHandler.js");
 const config = require("./config.js");
 
-// https://github.com/tmijs/tmi.js#tmijs
-// for more options
-const client = new tmi.client({
-  connection: {
-    secure: true,
-    reconnect: true,
-  },
-  channels: [config.channel],
+// https://github.com/martynsmith/node-irc
+const ircClient = new irc.Client(config.server, config.botName, {
+	channels: config.channels,
+  autoRejoin: true,
+  retryCount: 999,
+  retryDelay: 10000
 });
 
 const commandRegex =
   config.regexCommands ||
   new RegExp("^(" + config.commands.join("|") + ")$", "i");
 
-client.on("message", function (channel, tags, message, self) {
-  let isCorrectChannel = `#${config.channel}` === channel;
-  let messageMatches = message.match(commandRegex);
+ircClient.addListener("message", function(from, to, text, message) {
+  // return if message has been sent by the bot himself
+  if (message.nick === config.botName) {
+    return;
+  }
 
-  if (self) return;
-  if (isCorrectChannel && messageMatches) {
+  let messageMatches = text.match(commandRegex);
+
+  if (messageMatches) {
     // print username and message to console
-    console.log(`@${tags.username}: ${message}`);
+    console.log(`@${message.nick}: ${text}`);
 
     // send the message to the emulator
-    keyHandler.sendKey(message.toLowerCase());
+    keyHandler.sendKey(text.toLowerCase());
   }
 });
 
-client.addListener("connected", function (address, port) {
-  console.log("Connected! Waiting for messages..");
-});
-client.addListener("disconnected", function (reason) {
-  console.log("Disconnected from the server! Reason: " + reason);
-});
-
-client.connect();
-if (config.channel === 'twitchplayspokemon') {
-  console.log("");
-  console.log("'twitchplayspokemon' is the default channel! Otherwise, run with the environment variable: ");
-  console.log("TWITCH_CHANNEL=mychannelhere npm start");
-  console.log("");
-}
-console.log(`Connecting to /${config.channel}..`);

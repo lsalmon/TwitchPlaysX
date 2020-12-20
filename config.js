@@ -1,8 +1,13 @@
-// change these two variables
-let channel = process.env.TWITCH_CHANNEL || "twitchplayspokemon";
-let programName =
-  process.env.CONFIG_PROGRAM_NAME || "VisualBoyAdvance";
-  
+// IRC connection params
+let channels = ["#testing"];
+let server = "irc.freenode.net";
+let botName = "IrcBot_McPokemon";
+let programName = process.env.CONFIG_PROGRAM_NAME || "VisualBoyAdvance";
+
+// Input params
+let timeToWait = 5000;
+let delay = 100;
+
 // List of commands to check for
 let commands = [
   "left",
@@ -23,8 +28,12 @@ let throttledCommands = [];
 module.exports = {
   // all commands to print out
   commands,
-  // twitch channel to connect to
-  channel,
+  // IRC channels to connect to
+  channels,
+  // IRC server to connect to
+  server,
+  // IRC bot name
+  botName,
   // Title of the window of the program (ex: 'Desmume' or 'VBA')
   programName,
 
@@ -38,10 +47,10 @@ module.exports = {
   throttledCommands,
 
   // Throttle time in seconds
-  // Ex: you can limit 'start' so it's only used every 10 sec
-  timeToWait: 10000,
+  // Ex: you can limit 'start' so it's only used every 5 sec
+  timeToWait,
 
   // Delay between each possible keypress in milliseconds (can't be too fast)
   // To change on Windows, change `key.py`
-  delay: 100,
+  delay,
 };
